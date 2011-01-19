@@ -1,20 +1,24 @@
 import logging
 import re
+from itertools import takewhile
 from functools import wraps
 
 from google.appengine.api import urlfetch
 from google.appengine.ext import db
 
-from lib.BeautifulSoup import BeautifulSoup
+from lib.BeautifulSoup import BeautifulSoup, Tag, NavigableString
 from models import Sector, Author, Post, Idea
+
+
+def make_soup(url):
+    html = urlfetch.fetch(url).content
+    return BeautifulSoup(html)
 
 def withsoup(url):
     def decorator(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            html = urlfetch.fetch(url).content
-            soup = BeautifulSoup(html)
-            return f(soup, *args, **kwargs)
+            return f(make_soup(url), *args, **kwargs)
         return decorated
     return decorator
 
@@ -47,14 +51,13 @@ def import_ideas(soup, commit=True):
         title, author, sector = content.findAll('a')[:3]
         idea_id = find_int(title['href'])
 
-        author_id = find_int(author['href'])
-        author = make_author(author_id, author.string)
+        author = make_author(author)
 
         sector_id = find_int(sector['href'])
         sector = Sector.get_by_id(sector_id)
 
         body = content.findAll('p', limit=1)[0]
-        body = str(body)
+        body = unicode(body)
 
         # Then pull out votes
         upvotes_el = votes.find('strong')
@@ -66,7 +69,7 @@ def import_ideas(soup, commit=True):
         # Create the idea
         key = db.Key.from_path('Idea', idea_id)
         idea = Idea(key=key, author=author, sector=sector,
-                    title=str(title.string), body=body,
+                    title=unicode(title.string), body=body,
                     upvotes=upvotes, downvotes=downvotes)
         ideas.append(idea)
 
@@ -75,9 +78,47 @@ def import_ideas(soup, commit=True):
 
     return ideas
 
-def make_author(id, username, commit=True):
+def import_posts(commit=True):
+    ideas = Idea.all().fetch(1000)
+    posts = []
+    for idea in ideas:
+        soup = make_soup(idea.source_url)
+        headers = soup.find('td', 'main')\
+            .findAll('div', 'commentheader', recursive=False)
+        for header in headers:
+            content = header.findNextSiblings('div', limit=1)[0]
+            post = make_post(idea, header, content, commit=False)
+            posts.append(post)
+    if commit:
+        db.put(posts)
+    return posts
+
+def make_post(parent, header, content, commit=True):
+    author_link = header.find('span', 'avatarusername').find('a')
+    author = make_author(author_link)
+
+    # gather up content elements
+    els = iter(content)
+    def is_body(el):
+        return el.get('class') != 'smvote' if isinstance(el, Tag) else True
+    body = takewhile(is_body, els)
+    body = '\n'.join(str(el) for el in body)
+
+    id = find_int(content['id'])
+    key = db.Key.from_path('Post', id, parent=parent.key())
+    post = Post(key=key, author=author, body=body)
+
+    if commit:
+        post.put()
+
+    return post
+
+
+def make_author(author_link, commit=True):
+    id = find_int(author_link['href'])
+    username = unicode(author_link.string)
     key = db.Key.from_path('Author', int(id))
-    author = Author(key=key, username=unicode(username))
+    author = Author(key=key, username=username)
     if commit:
         author.put()
     return author
