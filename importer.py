@@ -80,22 +80,29 @@ def import_ideas(soup, commit=True):
 
 def import_posts(commit=True):
     ideas = Idea.all().fetch(1000)
+    print 'Importing posts for %s idea(s)' % len(ideas)
+
     posts = []
     for idea in ideas:
         soup = make_soup(idea.source_url)
         headers = soup.find('td', 'main')\
             .findAll('div', 'commentheader', recursive=False)
+        print ' Found %s posts on idea %s' % (len(headers), idea)
+
         for header in headers:
             content = header.findNextSiblings('div', limit=1)[0]
             post = make_post(idea, header, content, commit=False)
             posts.append(post)
+
     if commit:
         db.put(posts)
+
     return posts
 
 def make_post(parent, header, content, commit=True):
     author_link = header.find('span', 'avatarusername').find('a')
     author = make_author(author_link)
+    print '  Adding post by %s to %s' % (author, parent)
 
     # gather up content elements
     els = iter(content)
