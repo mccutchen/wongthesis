@@ -19,4 +19,5 @@ class Post(db.Model):
 
 
 class Idea(Post):
+    title = db.StringProperty()
     sector = db.ReferenceProperty(Sector, collection_name='ideas')

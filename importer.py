@@ -33,26 +33,41 @@ def import_sectors(soup, commit=True):
 
 @withsoup('http://manorlabs.spigit.com/homepage?num_ideas=1000')
 def import_ideas(soup, commit=True):
-    # <td style="padding-top: 10px;" valign="top">
-    attrs = {'style': 'padding-top: 10px;', 'valign': 'top'}
-    tds = soup.findAll('td', attrs)
+    # <table class="bottomline" width="100%">
+    rows = soup\
+        .find('table', 'bottomline')\
+        .find('tbody')\
+        .findAll('tr', recursive=False)
 
     ideas = []
-    for i, td in enumerate(tds):
-        title, author, sector = td.findAll('a')[:3]
-        idea_id = find_id(title['href'])
+    for i, row in enumerate(rows[:-1]):
+        votes, content = row.findAll('td', recursive=False)
 
-        author_id = find_id(author['href'])
+        # Pull out content first
+        title, author, sector = content.findAll('a')[:3]
+        idea_id = find_int(title['href'])
+
+        author_id = find_int(author['href'])
         author = make_author(author_id, author.string)
 
-        sector_id = find_id(sector['href'])
+        sector_id = find_int(sector['href'])
         sector = Sector.get_by_id(sector_id)
 
-        body = td.findAll('p', limit=1)[0]
+        body = content.findAll('p', limit=1)[0]
         body = str(body)
 
+        # Then pull out votes
+        upvotes_el = votes.find('strong')
+        upvotes = find_int(upvotes_el.string.strip())
+
+        downvotes = upvotes_el.nextSibling.nextSibling.nextSibling
+        downvotes = find_int(str(downvotes).strip())
+
+        # Create the idea
         key = db.Key.from_path('Idea', idea_id)
-        idea = Idea(key=key, author=author, sector=sector, body=body)
+        idea = Idea(key=key, author=author, sector=sector,
+                    title=str(title.string), body=body,
+                    upvotes=upvotes, downvotes=downvotes)
         ideas.append(idea)
 
     if commit:
@@ -67,5 +82,5 @@ def make_author(id, username, commit=True):
         author.put()
     return author
 
-def find_id(s):
-    return int(re.search(r'id=(\d+)', s).group(1))
+def find_int(s):
+    return int(re.search(r'(\d+)', s).group(1))
