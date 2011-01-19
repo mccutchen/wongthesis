@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Ideas</h2>
+    <ul>
+        {% for idea in ideas %}
+            <li>
+                <a href="/idea/{{ idea.key.id }}">{{ idea }}</a>
+                (+{{ idea.upvotes }}/-{{ idea.downvotes }})
+            </li>
+        {% empty %}
+            <li>No ideas.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}
