@@ -52,6 +52,10 @@ class Idea(Post):
     title = db.StringProperty()
     sector = db.ReferenceProperty(Sector, collection_name='ideas')
 
+    @property
+    def posts(self):
+        return db.Query(Post).ancestor(self)
+
     def make_source_url(self):
         return '/Idea/View?ideaid=%s' % self.key().id()
 
