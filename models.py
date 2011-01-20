@@ -43,6 +43,8 @@ class Author(BaseModel):
 class Post(BaseModel):
     body = db.TextProperty()
     author = db.ReferenceProperty(Author, collection_name='posts')
+    papa = db.ReferenceProperty(collection_name='posts') # parent post
+
     upvotes = db.IntegerProperty(default=0)
     downvotes = db.IntegerProperty(default=0)
     tags = db.StringListProperty()
@@ -57,10 +59,6 @@ class Idea(Post):
     sector = db.ReferenceProperty(Sector, collection_name='ideas')
     stage = db.StringProperty(choices=STAGES)
     views = db.IntegerProperty(default=0)
-
-    @property
-    def posts(self):
-        return db.Query(Post).ancestor(self).order('-created_at')
 
     def make_source_url(self):
         return '/Idea/View?ideaid=%s' % self.key().id()

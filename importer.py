@@ -26,6 +26,7 @@ def withsoup(url):
 
 @withsoup('http://manorlabs.spigit.com/Sector/List')
 def import_sectors(soup, commit=True):
+    print 'Importing sectors...'
     sectors = []
     links = soup.findAll('a', {'class':'sectiontitle'})
     for link in links:
@@ -33,12 +34,20 @@ def import_sectors(soup, commit=True):
         key = db.Key.from_path('Sector', int(id))
         sector = Sector(key=key, name=link.string.strip())
         sectors.append(sector)
+        print u' - %s' % sector
     if commit:
         db.put(sectors)
     return sectors
 
+def import_all():
+    import_sectors()
+    import_ideas()
+    import_posts()
+
 @withsoup('http://manorlabs.spigit.com/homepage?num_ideas=1000')
 def import_ideas(soup, commit=True):
+    print 'Importing ideas...'
+
     # <table class="bottomline" width="100%">
     rows = soup\
         .find('table', 'bottomline')\
@@ -84,6 +93,7 @@ def import_ideas(soup, commit=True):
             stage=stage,
             created_at=created_at)
         ideas.append(idea)
+        print ' - %s by %s' % (idea, author)
 
     if commit:
         db.put(ideas)
@@ -93,7 +103,7 @@ def import_ideas(soup, commit=True):
 def import_posts(commit=True):
     ideas = Idea.all().fetch(1000)
     #ideas = [Idea.get_by_id(9)]
-    print 'Importing posts for %s idea(s)' % len(ideas)
+    print 'Importing posts for %s idea(s)...' % len(ideas)
 
     to_put = []
     for idea in ideas:
@@ -107,8 +117,6 @@ def import_posts(commit=True):
 
         headers = soup.find('td', 'main')\
             .findAll('div', 'commentheader', recursive=False)
-        print ' Found %s posts on idea %s' % (len(headers), idea)
-
         for header in headers:
             content = header.findNextSiblings('div', limit=1)[0]
             post = make_post(idea, header, content, commit=False)
@@ -124,19 +132,28 @@ def import_posts(commit=True):
 def make_post(parent, header, content, commit=True):
     author_link = header.find('span', 'avatarusername').find('a')
     author = make_author(author_link)
-    print '  Adding post by %s' % (author)
+
+    indent = ' ' if content else '   '
+    print '%s- Adding post by %s' % (indent, author)
 
     created_at = parse_post_date(author_link.parent.nextSibling)
 
     # gather up content elements
-    els = iter(content) if content else header.findNextSiblings(True)
+    els = iter(content) if content else header.findNextSiblings()
     def is_body(el):
         return el.name != 'pre' if isinstance(el, Tag) else True
     body = takewhile(is_body, els)
     body = u'\n'.join(unicode(el) for el in body)
 
-    post = Post(parent=parent, author=author, body=body,
-                created_at=created_at)
+    post = Post.all()\
+        .filter('papa =', parent)\
+        .filter('author =', author)\
+        .filter('created_at =', created_at)\
+        .get()
+    if post is None:
+        post = Post(papa=parent, author=author,
+                    created_at=created_at)
+    post.body = body
 
     to_put = [post]
 
