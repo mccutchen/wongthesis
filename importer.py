@@ -8,6 +8,7 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import db
 
 from lib.BeautifulSoup import BeautifulSoup, Tag, NavigableString
+from lib import feedparser
 from models import Sector, Author, Post, Idea
 
 
@@ -61,35 +62,27 @@ def import_ideas(soup, commit=True):
         sector_id = find_int(sector['href'])
         sector = Sector.get_by_id(sector_id)
 
-        body = content.findAll('p', limit=2)[-1]
-        body = unicode(body)
-
-        # Then pull out votes
         upvotes_el = votes.find('strong')
         upvotes = find_int(upvotes_el.string.strip())
 
         downvotes = upvotes_el.nextSibling.nextSibling.nextSibling
         downvotes = find_int(str(downvotes).strip())
 
-        # Find views
-        try:
-            views = find_int(re.search(r'(\d+) Views', raw).group(1))
-        except AttributeError:
-            views = 0
-
-        # Find stage
-        try:
-            stage = re.search(r'Stage : (\w+)', raw).group(1)
-        except AttributeError:
-            stage = None
-
+        views = find_int(re.search(r'(\d+) Views', raw).group(1))
+        stage = re.search(r'Stage : (\w+)', raw).group(1)
 
         # Create the idea
         key = db.Key.from_path('Idea', idea_id)
-        idea = Idea(key=key, author=author, sector=sector,
-                    title=unicode(title.string), body=body,
-                    upvotes=upvotes, downvotes=downvotes,
-                    views=views, stage=stage, created_at=created_at)
+        idea = Idea(
+            key=key,
+            author=author,
+            sector=sector,
+            title=unicode(title.string),
+            upvotes=upvotes,
+            downvotes=downvotes,
+            views=views,
+            stage=stage,
+            created_at=created_at)
         ideas.append(idea)
 
     if commit:
@@ -101,9 +94,16 @@ def import_posts(commit=True):
     ideas = Idea.all().fetch(1000)
     print 'Importing posts for %s idea(s)' % len(ideas)
 
-    posts = []
+    to_put = []
     for idea in ideas:
         soup = make_soup(idea.source_url)
+
+        # We get the idea's actual body from the RSS feed
+        rss = feedparser.parse(idea_feed_url(idea))
+        idea.body = rss.feed.subtitle.replace(
+            '\nFeed Created by spigit.com feed manager.', '')
+        to_put.append(idea)
+
         headers = soup.find('td', 'main')\
             .findAll('div', 'commentheader', recursive=False)
         print ' Found %s posts on idea %s' % (len(headers), idea)
@@ -111,17 +111,19 @@ def import_posts(commit=True):
         for header in headers:
             content = header.findNextSiblings('div', limit=1)[0]
             post = make_post(idea, header, content, commit=False)
-            posts.append(post)
+            to_put.extend(post)
+
+    to_put = filter(None, to_put)
 
     if commit:
-        db.put(posts)
+        db.put(to_put)
 
-    return posts
+    return to_put
 
 def make_post(parent, header, content, commit=True):
     author_link = header.find('span', 'avatarusername').find('a')
     author = make_author(author_link)
-    print '  Adding post by %s to %s' % (author, parent)
+    print '  Adding post by %s' % (author)
 
     # gather up content elements
     els = iter(content)
@@ -134,10 +136,12 @@ def make_post(parent, header, content, commit=True):
     key = db.Key.from_path('Post', id, parent=parent.key())
     post = Post(key=key, author=author, body=body)
 
-    if commit:
-        post.put()
+    to_put = [post]
 
-    return post
+    if commit:
+        db.put(to_put)
+
+    return to_put
 
 def make_author(author_link, commit=True):
     id = find_int(author_link['href'])
@@ -154,3 +158,6 @@ def find_int(s):
 def parse_idea_date(s):
     s = ' '.join(s.strip().split(' ')[1:-1])
     return datetime.datetime.strptime(s, '%m/%d/%Y %I:%M %p')
+
+def idea_feed_url(idea):
+    return 'http://manorlabs.spigit.com/feed/idea/%s' % idea.key().id()

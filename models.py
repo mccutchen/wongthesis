@@ -60,7 +60,7 @@ class Idea(Post):
 
     @property
     def posts(self):
-        return db.Query(Post).ancestor(self)
+        return db.Query(Post).ancestor(self).order('-created_at')
 
     def make_source_url(self):
         return '/Idea/View?ideaid=%s' % self.key().id()
