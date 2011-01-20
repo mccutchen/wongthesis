@@ -5,8 +5,10 @@
     <ul>
         {% for idea in ideas %}
             <li>
-                <a href="/idea/{{ idea.key.id }}">{{ idea }}</a>
-                (+{{ idea.upvotes }}/-{{ idea.downvotes }})
+                <h3><a href="/idea/{{ idea.key.id }}">{{ idea|safe }}</a> by <a href="/idea/{{ idea.author.key.id }}">{{ idea.author }}</a></h3>
+                In <a href="/sector/{{ idea.sector.key.id }}">{{ idea.sector }}</a> |
+                <span class="pos">+{{ idea.upvotes }}</span>/<span class="neg">-{{ idea.downvotes }}</span> votes |
+                {{ idea.views }} view{{ idea.views|pluralize }}
             </li>
         {% empty %}
             <li>No ideas.</li>

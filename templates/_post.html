@@ -1,0 +1,10 @@
+<div class="post">
+    <h4><a href="/author/{{ post.author.key.id }}">{{ post.author }} said:</a></h4>
+    <div class="body">
+        {{ post.body|safe }}
+    </div>
+
+    {% for post in post.posts %}
+        {% include "_post.html" %}
+    {% endfor %}
+</div>

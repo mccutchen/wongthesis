@@ -12,12 +12,7 @@
     <div class="responses">
         <h3>Responses</h3>
         {% for post in idea.posts %}
-            <div class="post">
-                <h4><a href="/author/{{ post.author.key.id }}">{{ post.author }} said:</a></h4>
-                <div class="body">
-                    {{ post.body|safe }}
-                </div>
-            </div>
+            {% include "_post.html" %}
         {% empty %}
             <p><i>No responses.</i></p>
         {% endfor %}
