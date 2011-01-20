@@ -92,6 +92,7 @@ def import_ideas(soup, commit=True):
 
 def import_posts(commit=True):
     ideas = Idea.all().fetch(1000)
+    #ideas = [Idea.get_by_id(9)]
     print 'Importing posts for %s idea(s)' % len(ideas)
 
     to_put = []
@@ -125,18 +126,31 @@ def make_post(parent, header, content, commit=True):
     author = make_author(author_link)
     print '  Adding post by %s' % (author)
 
-    # gather up content elements
-    els = iter(content)
-    def is_body(el):
-        return el.get('class') != 'smvote' if isinstance(el, Tag) else True
-    body = takewhile(is_body, els)
-    body = '\n'.join(str(el) for el in body)
+    created_at = parse_post_date(author_link.parent.nextSibling)
 
-    id = find_int(content['id'])
-    key = db.Key.from_path('Post', id, parent=parent.key())
-    post = Post(key=key, author=author, body=body)
+    # gather up content elements
+    els = iter(content) if content else header.findNextSiblings(True)
+    def is_body(el):
+        return el.name != 'pre' if isinstance(el, Tag) else True
+    body = takewhile(is_body, els)
+    body = u'\n'.join(unicode(el) for el in body)
+
+    post = Post(parent=parent, author=author, body=body,
+                created_at=created_at)
 
     to_put = [post]
+
+    if content:
+        children = content.find('div', style='padding: 5px 0 0 40px;')
+    else:
+        children = None
+
+    if children:
+        to_put = []
+        post.put()
+        headers = children.findAll('div', 'commentheader', recursive=False)
+        for header in headers:
+            to_put.extend(make_post(post, header, None))
 
     if commit:
         db.put(to_put)
@@ -158,6 +172,14 @@ def find_int(s):
 def parse_idea_date(s):
     s = ' '.join(s.strip().split(' ')[1:-1])
     return datetime.datetime.strptime(s, '%m/%d/%Y %I:%M %p')
+
+def parse_post_date(s):
+    s = s.replace('-', '').strip()
+    now = datetime.datetime.now()
+    date = datetime.datetime.strptime(s, '%b %d, %Y')
+    return date.replace(hour=now.hour, minute=now.minute)
+
+
 
 def idea_feed_url(idea):
     return 'http://manorlabs.spigit.com/feed/idea/%s' % idea.key().id()
