@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Idea: {{ idea.title }}</h2>
+    <h3>By <a href="/author/{{ idea.author.key.id }}">{{ idea.author }}</a></h3>
+    <h4>In <a href="/sector/{{ idea.sector.key.id }}">{{ idea.sector }}</a></h4>
+
+    <div class="idea body">
+        {{ idea.body|safe }}
+    </div>
+
+    <div class="responses">
+        <h3>Responses</h3>
+        {% for post in idea.posts %}
+            <div class="post">
+                <h4><a href="/author/{{ post.author.key.id }}">{{ post.author }} said:</a></h4>
+                <div class="body">
+                    {{ post.body|safe }}
+                </div>
+            </div>
+        {% empty %}
+            <p><i>No responses.</i></p>
+        {% endfor %}
+    </div>
+{% endblock %}

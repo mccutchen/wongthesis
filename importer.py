@@ -120,7 +120,6 @@ def make_post(parent, header, content, commit=True):
 
     return post
 
-
 def make_author(author_link, commit=True):
     id = find_int(author_link['href'])
     username = unicode(author_link.string)

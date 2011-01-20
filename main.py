@@ -25,8 +25,21 @@ class IndexHandler(BaseHandler):
         self.render('index.html', {'ideas': ideas})
 
 
+class IdeaHandler(BaseHandler):
+
+    def get(self, id):
+        idea = Idea.get_by_id(int(id))
+        if idea is None:
+            self.error(404)
+            self.response.out.write('Idea not found.')
+            return
+
+        self.render('idea.html', {'idea': idea})
+
+
 urls = [
     (r'^/$', IndexHandler),
+    (r'^/idea/(\d+)', IdeaHandler),
     ]
 
 application = webapp.WSGIApplication(urls, debug=True)
