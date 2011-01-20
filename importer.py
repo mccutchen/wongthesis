@@ -61,7 +61,7 @@ def import_ideas(soup, commit=True):
         sector_id = find_int(sector['href'])
         sector = Sector.get_by_id(sector_id)
 
-        body = content.findAll('p', limit=1)[0]
+        body = content.findAll('p', limit=2)[-1]
         body = unicode(body)
 
         # Then pull out votes
