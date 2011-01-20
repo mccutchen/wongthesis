@@ -1,3 +1,4 @@
+import datetime
 import logging
 import re
 from itertools import takewhile
@@ -46,10 +47,14 @@ def import_ideas(soup, commit=True):
     ideas = []
     for i, row in enumerate(rows[:-1]):
         votes, content = row.findAll('td', recursive=False)
+        raw = unicode(content)
 
         # Pull out content first
         title, author, sector = content.findAll('a')[:3]
         idea_id = find_int(title['href'])
+
+        raw_date = sector.nextSibling
+        created_at = parse_idea_date(raw_date)
 
         author = make_author(author)
 
@@ -66,11 +71,25 @@ def import_ideas(soup, commit=True):
         downvotes = upvotes_el.nextSibling.nextSibling.nextSibling
         downvotes = find_int(str(downvotes).strip())
 
+        # Find views
+        try:
+            views = find_int(re.search(r'(\d+) Views', raw).group(1))
+        except AttributeError:
+            views = 0
+
+        # Find stage
+        try:
+            stage = re.search(r'Stage : (\w+)', raw).group(1)
+        except AttributeError:
+            stage = None
+
+
         # Create the idea
         key = db.Key.from_path('Idea', idea_id)
         idea = Idea(key=key, author=author, sector=sector,
                     title=unicode(title.string), body=body,
-                    upvotes=upvotes, downvotes=downvotes)
+                    upvotes=upvotes, downvotes=downvotes,
+                    views=views, stage=stage, created_at=created_at)
         ideas.append(idea)
 
     if commit:
@@ -131,3 +150,7 @@ def make_author(author_link, commit=True):
 
 def find_int(s):
     return int(re.search(r'(\d+)', s).group(1))
+
+def parse_idea_date(s):
+    s = ' '.join(s.strip().split(' ')[1:-1])
+    return datetime.datetime.strptime(s, '%m/%d/%Y %I:%M %p')

@@ -2,6 +2,9 @@ import logging
 from google.appengine.ext import db
 
 
+STAGES = ('Incubation', 'Validation', 'Emergence', 'Closed', 'Aborted')
+
+
 class BaseModel(db.Model):
 
     host = 'http://manorlabs.spigit.com'
@@ -43,6 +46,7 @@ class Post(BaseModel):
     upvotes = db.IntegerProperty(default=0)
     downvotes = db.IntegerProperty(default=0)
     tags = db.StringListProperty()
+    created_at = db.DateTimeProperty()
 
     def __unicode__(self):
         return u'Post:%s' % self.key().id()
@@ -51,6 +55,8 @@ class Post(BaseModel):
 class Idea(Post):
     title = db.StringProperty()
     sector = db.ReferenceProperty(Sector, collection_name='ideas')
+    stage = db.StringProperty(choices=STAGES)
+    views = db.IntegerProperty(default=0)
 
     @property
     def posts(self):
