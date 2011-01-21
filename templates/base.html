@@ -3,21 +3,12 @@
 <html>
     <head>
         <title>Wong Thesis | {% block title %}Home{% endblock %}</title>
-        <style type="text/css" media="screen">
-            .post {
-                border: 1px dotted #ccc;
-                padding: 10px;
-                margin: 10px 0;
-            }
-            .post .post {
-                margin: 10px;
-            }
-        </style>
+        <link rel="stylesheet" href="/static/yoyoyo.css">
     </head>
     <body>
         <h1>Wong Thesis</h1>
-        {% block content %}
-            
-        {% endblock %}
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
     </body>
 </html>

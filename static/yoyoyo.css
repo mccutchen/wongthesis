@@ -1,0 +1,37 @@
+body {
+	background-color: #fff;
+	color: #333;
+	font: 12px "Lucida Grande", verdana;
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	color: #369;
+	text-decoration: none;
+	border-bottom: 1px dotted #ccc;
+}
+a:hover {
+	border-color: #369;
+}
+
+h1 {
+	margin: 0 0 20px 0;
+	color: #fff;
+	background-color: #900;
+	border-bottom: 2px solid #600;
+	padding: 10px 20px;
+}
+
+div.content {
+	margin: 20px;
+}
+
+.post {
+    border: 1px dotted #ccc;
+    padding: 10px;
+    margin: 10px 0;
+}
+.post .post {
+    margin: 10px;
+}
