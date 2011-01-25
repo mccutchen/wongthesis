@@ -1,11 +1,14 @@
 import os
 import logging
 
+from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from models import Idea, Sector, Author, Post
+from django.utils import simplejson as json
+
+from models import Idea, Sector, Author, Post, TAGS, STAGES
 
 
 class BaseHandler(webapp.RequestHandler):
@@ -44,9 +47,38 @@ class IdeaHandler(BaseHandler):
         self.render('idea.html', {'idea': idea})
 
 
+class TagsHandler(BaseHandler):
+
+    def post(self, path=None):
+        key = self.request.POST.get('key')
+        tags = self.request.POST.get('tags')
+
+        if None in (key, tags):
+            self.error(500)
+            return self.response.out.write('Missing key or tags')
+
+        tags = [tag.strip() for tag in tags.split(',') if tag in TAGS]
+        if not tags:
+            self.error(500)
+            return self.response.out.write('No valid tags given')
+
+        def txn():
+            obj = db.get(key)
+            if obj is None:
+                self.error(500)
+                return self.response.out.write('Entity %r not found' % key)
+            obj.tags = list(set(obj.tags or []) + set(tags))
+            return obj
+        obj = db.run_in_transaction(txn)
+
+        self.response.headers['Content-Type'] = 'application/json'
+        self.repsonse.out.write(json.dumps(obj.tags))
+
+
 urls = [
     (r'^/$', IndexHandler),
     (r'^/idea/(\d+)', IdeaHandler),
+    (r'^/tags(.*)', TagsHandler),
     ]
 
 application = webapp.WSGIApplication(urls, debug=True)
