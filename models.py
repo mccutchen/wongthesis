@@ -4,6 +4,26 @@ from google.appengine.ext import db
 
 STAGES = ('Incubation', 'Validation', 'Emergence', 'Closed', 'Aborted')
 
+TAGS = ('Idea',
+        'Reply',
+        'Moderator',
+        'No Reply',
+        'Reasoned Opinion Expression',
+        'Sourcing',
+        'Sourcing - Mass',
+        'Sourcing - Other Participants',
+        'Sourcing - Personal',
+        'Disagreement',
+        'Agreement',
+        'Questioning',
+        'Questioning - Offtopic',
+        'Questioning - Ontopic',
+        'Metatalk',
+        'Ontopic',
+        'Offtopic',
+        'Social',
+        'Spam')
+
 
 class BaseModel(db.Model):
 
