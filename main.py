@@ -12,10 +12,17 @@ class BaseHandler(webapp.RequestHandler):
 
     template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 
-    def render(self, path, context, status=200):
+    context = {
+        'tags': TAGS,
+        'stages': STAGES,
+        }
+
+    def render(self, path, context=None, status=200):
+        local_context = dict(self.context)
+        local_context.update(context or {})
         path = os.path.join(self.template_dir, path)
         self.response.set_status(200)
-        self.response.out.write(template.render(path, context))
+        self.response.out.write(template.render(path, local_context))
 
 
 class IndexHandler(BaseHandler):
