@@ -4,6 +4,10 @@
         {{ post.body|safe }}
     </div>
 
+    {% with idea as obj %}
+        {% include "_tags.html" %}
+    {% endwith %}
+
     {% for post in post.posts %}
         {% include "_post.html" %}
     {% endfor %}

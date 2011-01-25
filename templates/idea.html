@@ -9,6 +9,10 @@
         {{ idea.body|safe }}
     </div>
 
+    {% with idea as obj %}
+        {% include "_tags.html" %}
+    {% endwith %}
+
     <div class="responses">
         <h3>Responses</h3>
         {% for post in idea.posts %}

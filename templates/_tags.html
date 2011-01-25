@@ -1,0 +1,8 @@
+<div class="tags">
+    <b>Tags:</b>
+    {% for tag in obj.tags %}
+        <span>{{ tag }}</span>
+    {% empty %}
+        <i>None</i>
+    {% endfor %}
+</div>
