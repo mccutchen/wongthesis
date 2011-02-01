@@ -1,7 +1,7 @@
 import datetime
 import logging
 import re
-from itertools import takewhile
+from itertools import takewhile, imap
 from functools import wraps
 
 from google.appengine.api import urlfetch
@@ -129,21 +129,26 @@ def import_posts(commit=True):
 
     return to_put
 
-def make_post(parent, header, content, commit=True):
+def sibs(el):
+    next = el.nextSibling
+    while next:
+        yield next
+        next = next.nextSibling
+
+def make_post(parent, header, content, commit=True, level=1):
     author_link = header.find('span', 'avatarusername').find('a')
     author = make_author(author_link)
 
-    indent = ' ' if content else '   '
+    indent = ' ' * (level * 2)
     print '%s- Adding post by %s' % (indent, author)
 
     created_at = parse_post_date(author_link.parent.nextSibling)
 
     # gather up content elements
-    els = iter(content) if content else header.findNextSiblings()
+    els = iter(content) if content else sibs(header)
     def is_body(el):
         return el.name != 'pre' if isinstance(el, Tag) else True
-    body = takewhile(is_body, els)
-    body = u'\n'.join(unicode(el) for el in body)
+    body = u'\n'.join(imap(unicode, takewhile(is_body, els)))
 
     post = Post.all()\
         .filter('papa =', parent)\
@@ -166,8 +171,10 @@ def make_post(parent, header, content, commit=True):
         to_put = []
         post.put()
         headers = children.findAll('div', 'commentheader', recursive=False)
+        if headers:
+            print '%s  (found %s child post(s))' % (indent, len(headers))
         for header in headers:
-            to_put.extend(make_post(post, header, None))
+            to_put.extend(make_post(post, header, None, level=level+1))
 
     if commit:
         db.put(to_put)
