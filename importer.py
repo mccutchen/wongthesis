@@ -91,7 +91,8 @@ def import_ideas(soup, commit=True):
             downvotes=downvotes,
             views=views,
             stage=stage,
-            created_at=created_at)
+            created_at=created_at,
+            tags=['Idea'])
         ideas.append(idea)
         print ' - %s by %s' % (idea, author)
 
@@ -158,7 +159,7 @@ def make_post(parent, header, content, commit=True, level=1):
         .get()
     if post is None:
         post = Post(papa=parent, author=author,
-                    created_at=created_at)
+                    created_at=created_at, tags=['Reply'])
     post.body = clean_body(body)
 
     to_put = [post]
