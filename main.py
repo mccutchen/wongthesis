@@ -49,6 +49,14 @@ class IdeaHandler(BaseHandler):
 
 class TagsHandler(BaseHandler):
 
+    def get(self, path=None):
+        if 'q' in self.request.params and not path:
+            q = self.request.params.get('q').strip()
+            matches = [tag for tag in TAGS if q.lower() in tag.lower()]
+            resp = [{'id': match, 'name': match} for match in matches]
+            self.response.headers['Content-Type'] = 'application/json'
+            self.response.out.write(json.dumps(resp))
+
     def post(self, path=None):
         key = self.request.POST.get('key')
         tags = self.request.POST.get('tags')

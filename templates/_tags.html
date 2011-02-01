@@ -1,8 +1,5 @@
-<div class="tags">
+<form action="/tags" method="post" class="tags">
     <b>Tags:</b>
-    {% for tag in obj.tags %}
-        <span>{{ tag }}</span>
-    {% empty %}
-        <i>None</i>
-    {% endfor %}
-</div>
+    <input type="text" name="tags" value="{{ obj.tags|join:', ' }}">
+    <input type="hidden" name="key" value="{{ obj.key }}">
+</form>
