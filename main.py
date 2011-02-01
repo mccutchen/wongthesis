@@ -57,7 +57,7 @@ class TagsHandler(BaseHandler):
             self.error(500)
             return self.response.out.write('Missing key or tags')
 
-        tags = [tag.strip() for tag in tags.split(',') if tag in TAGS]
+        tags = [tag.strip() for tag in tags.split(',') if tag.strip() in TAGS]
         if not tags:
             self.error(500)
             return self.response.out.write('No valid tags given')
@@ -67,12 +67,13 @@ class TagsHandler(BaseHandler):
             if obj is None:
                 self.error(500)
                 return self.response.out.write('Entity %r not found' % key)
-            obj.tags = list(set(obj.tags or []) + set(tags))
+            obj.tags = list(set(obj.tags or []).union(set(tags)))
+            obj.put()
             return obj
         obj = db.run_in_transaction(txn)
 
         self.response.headers['Content-Type'] = 'application/json'
-        self.repsonse.out.write(json.dumps(obj.tags))
+        self.response.out.write(json.dumps(obj.tags))
 
 
 urls = [
