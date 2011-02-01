@@ -111,8 +111,9 @@ def import_posts(commit=True):
 
         # We get the idea's actual body from the RSS feed
         rss = feedparser.parse(idea_feed_url(idea))
-        idea.body = rss.feed.subtitle.replace(
+        body = rss.feed.subtitle.replace(
             '\nFeed Created by spigit.com feed manager.', '')
+        idea.body = clean_body(body)
         to_put.append(idea)
 
         headers = soup.find('td', 'main')\
@@ -158,7 +159,7 @@ def make_post(parent, header, content, commit=True, level=1):
     if post is None:
         post = Post(papa=parent, author=author,
                     created_at=created_at)
-    post.body = body
+    post.body = clean_body(body)
 
     to_put = [post]
 
@@ -207,3 +208,13 @@ def parse_post_date(s):
 
 def idea_feed_url(idea):
     return 'http://manorlabs.spigit.com/feed/idea/%s' % idea.key().id()
+
+def clean_body(body):
+    br = r'\s*<br\s*/?>\s*'
+    p = r'<p>\s*</p>'
+    body = body.strip()
+    body = re.sub(r'^(%s)*' % br, '', body)
+    body = re.sub(r'(%s)*$' % br, '', body)
+    body = re.sub(p, '', body)
+    return body
+
