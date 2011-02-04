@@ -1,0 +1,6 @@
+<li>
+    <h3><a href="/idea/{{ idea.key.id }}">{{ idea|safe }}</a> by <a href="/author/{{ idea.author.key.id }}">{{ idea.author }}</a></h3>
+    In <a href="/sector/{{ idea.sector.key.id }}">{{ idea.sector }}</a> |
+    <span class="pos">+{{ idea.upvotes }}</span>/<span class="neg">-{{ idea.downvotes }}</span> votes |
+    {{ idea.views }} view{{ idea.views|pluralize }}
+</li>
