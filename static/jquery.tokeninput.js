@@ -201,40 +201,7 @@ $.TokenList = function (input, settings) {
     // The list to store the token items in
     var token_list = $("<ul />")
         .addClass(settings.classes.tokenList)
-        .insertAfter(hidden_input)
-        .click(function (event) {
-            var li = get_element_from_event(event, "li");
-            if(li && li.get(0) != input_token.get(0)) {
-                toggle_select_token(li);
-                return false;
-            } else {
-                input_box.focus();
-
-                if(selected_token) {
-                    deselect_token($(selected_token), POSITION.END);
-                }
-            }
-        })
-        .mouseover(function (event) {
-            var li = get_element_from_event(event, "li");
-            if(li && selected_token !== this) {
-                li.addClass(settings.classes.highlightedToken);
-            }
-        })
-        .mouseout(function (event) {
-            var li = get_element_from_event(event, "li");
-            if(li && selected_token !== this) {
-                li.removeClass(settings.classes.highlightedToken);
-            }
-        })
-        .mousedown(function (event) {
-            // Stop user selecting text on tokens
-            var li = get_element_from_event(event, "li");
-            if(li){
-                return false;
-            }
-        });
-
+        .insertAfter(hidden_input);
 
     // The list to store the dropdown items in
     var dropdown = $("<div>")
