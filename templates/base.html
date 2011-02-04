@@ -23,22 +23,37 @@
                     selectedDropdownItem: "token-input-selected-dropdown-item-facebook",
                     inputToken: "token-input-input-token-facebook"
                 };
-                
-                var onResult = function(results) {
-                    console.log(arguments);
-                    return results;
+
+                var onChange = function(input) {
+                    var form = $(input).parent('form'),
+                        type = form.attr('method'),
+                        url = form.attr('action'),
+                        data = form.serialize();
+                    console.log('Submitting form %o via %s to %s with %s',
+                                form, type, url, data);
+                    $.ajax({
+                        url: url,
+                        type: type,
+                        data: data,
+                        error: function(xhr, textStatus) {
+                            alert('Error updating tags: ' + textStatus);
+                        }
+                    });
                 };
-                
+
                 $('form.tags input[name="tags"]').each(function (i, el) {
+                    // Do we have any existing tags for this input?
                     var initialData = (el.value) ? el.value.split(', ') : [];
                     var prePopulate = $.map(initialData, function(el) {
                         return { id: el, name: el };
                     });
-                    console.log('Prepopulate %o: %o', el, prePopulate);
+                    // We need to reset the value, because the tokenInput 
+                    // plugin will re-add our initial data to the input
+                    el.value = '';
                     $(el).tokenInput('/tags', {
                         classes: classes,
                         prePopulate: prePopulate,
-                        onResult: onResult
+                        onChange: onChange
                     });
                 });
             });
