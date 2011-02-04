@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>{{ facet.kind|default:facet }}: {{ facet }}</h2>
+    <ul>
+        {% for idea in ideas %}
+            {% include "_idea_summary.html" %}
+        {% empty %}
+            <li>No ideas.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

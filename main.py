@@ -47,15 +47,59 @@ class IdeaHandler(BaseHandler):
         self.render('idea.html', {'idea': idea})
 
 
+class BrowseHandler(BaseHandler):
+
+    def get_facet(self, facet, criteria):
+        return None
+
+    def get_ideas(self, facet, criteria):
+        return []
+
+    def get(self, facet, criteria):
+        try:
+            facet = self.get_facet(facet, criteria)
+            ideas = self.get_ideas(facet, criteria)
+        except Exception, e:
+            logging.error('Could not browse by %s %r: %s', facet, criteria, e)
+            self.error(404)
+            self.response.out.write('%s %s not found.' % (facet, criteria))
+        else:
+            ctx = { 'facet': facet, 'ideas': ideas }
+            return self.render('browse.html', ctx)
+
+
+class SectorHandler(BrowseHandler):
+    def get_facet(self, facet, criteria):
+        return Sector.get_by_id(int(criteria))
+    def get_ideas(self, facet, criteria):
+        return facet.ideas.fetch(1000)
+
+class AuthorHandler(BrowseHandler):
+    def get_facet(self, facet, criteria):
+        return Author.get_by_id(int(criteria))
+    def get_ideas(self, criteria, facet):
+        return Idea.all().filter('author =', facet).fetch(1000)
+
+class TagHandler(BrowseHandler):
+    def get_facet(self, facet, criteria):
+        return 'Tag'
+    def get_ideas(self, facet, criteria):
+        return Idea.all().filter('tags =', criteria)
+
+
 class TagsHandler(BaseHandler):
+    """Handles the tag-completion choices on GET and updates the tags on
+    arbitrary items on POST."""
 
     def get(self, path=None):
+        # Special case for tag completion choices
         if 'q' in self.request.params and not path:
             q = self.request.params.get('q').strip()
             matches = [tag for tag in TAGS if q.lower() in tag.lower()]
             resp = [{'id': match, 'name': match} for match in matches]
             self.response.headers['Content-Type'] = 'application/json'
             self.response.out.write(json.dumps(resp))
+            return
 
     def post(self, path=None):
         key = self.request.POST.get('key')
@@ -91,6 +135,9 @@ class TagsHandler(BaseHandler):
 urls = [
     (r'^/$', IndexHandler),
     (r'^/idea/(\d+)', IdeaHandler),
+    (r'^/(sector)/(\d+)', SectorHandler),
+    (r'^/(author)/(\d+)', AuthorHandler),
+    (r'^/(tag)/([\w ]+)', TagHandler),
     (r'^/tags(.*)', TagsHandler),
     ]
 
