@@ -26,7 +26,7 @@ $.fn.tokenInput = function (url, options) {
         contentType: "json",
         queryParam: "q",
         onResult: null,
-        classes: {}
+        onChange: null
     }, options);
 
     settings.classes = $.extend({
@@ -355,6 +355,10 @@ $.TokenList = function (input, settings) {
             input_box.hide();
             hide_dropdown();
         }
+
+        if ($.isFunction(settings.onChange)) {
+            settings.onChange(hidden_input);
+        }
     }
 
     // Select a token in the token list
@@ -428,6 +432,10 @@ $.TokenList = function (input, settings) {
                 .show()
                 .val("")
                 .focus();
+        }
+
+        if ($.isFunction(settings.onChange)) {
+            settings.onChange(hidden_input);
         }
     }
 
