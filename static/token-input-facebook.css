@@ -182,3 +182,7 @@ div.token-input-dropdown-facebook {
     z-index: 1;
     -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .1);
 }
+li.token-input-token-facebook a {
+    color: #333;
+    border: none;
+}
