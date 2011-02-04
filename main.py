@@ -84,7 +84,8 @@ class TagHandler(BrowseHandler):
     def get_facet(self, facet, criteria):
         return 'Tag'
     def get_ideas(self, facet, criteria):
-        return Idea.all().filter('tags =', criteria)
+        return Idea.all().filter('tags =', urllib.unquote(criteria))\
+            .fetch(1000)
 
 
 class TagsHandler(BaseHandler):
