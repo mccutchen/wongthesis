@@ -40,6 +40,9 @@
                         }
                     });
                 };
+                var markupToken = function(id, value) {
+                    return '<a href="/tag/' + id + '">' + value + '</a>';
+                }
 
                 $('form.tags input[name="tags"]').each(function (i, el) {
                     // Do we have any existing tags for this input?
@@ -53,7 +56,8 @@
                     $(el).tokenInput('/tags', {
                         classes: classes,
                         prePopulate: prePopulate,
-                        onChange: onChange
+                        onChange: onChange,
+                        markupToken: markupToken
                     });
                 });
             });

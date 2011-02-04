@@ -165,7 +165,7 @@ li.token-input-token-facebook span {
     font-weight: normal;
     margin-left: 3px;
 }
-li.token-input-token-facebook:hover span {
+li.token-input-token-facebook span:hover {
     color: #900;
 }
 
