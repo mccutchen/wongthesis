@@ -1,5 +1,6 @@
 import os
 import logging
+import urllib
 
 from google.appengine.ext import db
 from google.appengine.ext import webapp
@@ -55,16 +56,21 @@ class BrowseHandler(BaseHandler):
     def get_ideas(self, facet, criteria):
         return []
 
+    def get_posts(self, facet, criteria):
+        return []
+
     def get(self, facet, criteria):
         try:
             facet = self.get_facet(facet, criteria)
             ideas = self.get_ideas(facet, criteria)
+            posts = self.get_posts(facet, criteria)
         except Exception, e:
+            raise
             logging.error('Could not browse by %s %r: %s', facet, criteria, e)
             self.error(404)
             self.response.out.write('%s %s not found.' % (facet, criteria))
         else:
-            ctx = { 'facet': facet, 'ideas': ideas }
+            ctx = { 'facet': facet, 'ideas': ideas, 'posts': posts }
             return self.render('browse.html', ctx)
 
 
@@ -77,14 +83,19 @@ class SectorHandler(BrowseHandler):
 class AuthorHandler(BrowseHandler):
     def get_facet(self, facet, criteria):
         return Author.get_by_id(int(criteria))
-    def get_ideas(self, criteria, facet):
+    def get_ideas(self, facet, criteria):
         return Idea.all().filter('author =', facet).fetch(1000)
+    def get_posts(self, facet, criteria):
+        return Post.all().filter('author =', facet).fetch(1000)
 
 class TagHandler(BrowseHandler):
     def get_facet(self, facet, criteria):
         return 'Tag'
     def get_ideas(self, facet, criteria):
         return Idea.all().filter('tags =', urllib.unquote(criteria))\
+            .fetch(1000)
+    def get_posts(self, facet, criteria):
+        return Post.all().filter('tags =', urllib.unquote(criteria))\
             .fetch(1000)
 
 
@@ -138,8 +149,8 @@ urls = [
     (r'^/idea/(\d+)', IdeaHandler),
     (r'^/(sector)/(\d+)', SectorHandler),
     (r'^/(author)/(\d+)', AuthorHandler),
-    (r'^/(tag)/([\w ]+)', TagHandler),
-    (r'^/tags(.*)', TagsHandler),
+    (r'^/(tag)/(.+)', TagHandler),
+    (r'^/tags$', TagsHandler),
     ]
 
 application = webapp.WSGIApplication(urls, debug=True)

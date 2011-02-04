@@ -2,6 +2,8 @@
 
 {% block content %}
     <h2>{{ facet.kind|default:facet }}: {{ facet }}</h2>
+    
+    <h3>Found {{ ideas|length }} idea{{ ideas|pluralize }}</h3>
     <ul>
         {% for idea in ideas %}
             {% include "_idea_summary.html" %}
@@ -9,4 +11,13 @@
             <li>No ideas.</li>
         {% endfor %}
     </ul>
+
+    {% if posts %}
+        <h3>Found {{ posts|length }} posts{{ posts|pluralize }}</h3>
+        <ul>
+            {% for post in posts %}
+                {% include "_post_summary.html" %}
+            {% endfor %}
+        </ul>
+    {% endif %}
 {% endblock %}
