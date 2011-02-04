@@ -29,9 +29,17 @@
                     return results;
                 };
                 
-                $('form.tags input[name="tags"]').tokenInput('/tags', {
-                    classes: classes,
-                    onResult: onResult
+                $('form.tags input[name="tags"]').each(function (i, el) {
+                    var initialData = (el.value) ? el.value.split(', ') : [];
+                    var prePopulate = $.map(initialData, function(el) {
+                        return { id: el, name: el };
+                    });
+                    console.log('Prepopulate %o: %o', el, prePopulate);
+                    $(el).tokenInput('/tags', {
+                        classes: classes,
+                        prePopulate: prePopulate,
+                        onResult: onResult
+                    });
                 });
             });
         </script>
