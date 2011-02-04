@@ -26,7 +26,10 @@ $.fn.tokenInput = function (url, options) {
         contentType: "json",
         queryParam: "q",
         onResult: null,
-        onChange: null
+        onChange: null,
+        markupToken: function(id, value) {
+            return '<p>' + value + '</p>';
+        }
     }, options);
 
     settings.classes = $.extend({
@@ -74,7 +77,7 @@ $.TokenList = function (input, settings) {
 
     // Save the tokens
     var saved_tokens = [];
-    
+
     // Keep track of the number of tokens in the list
     var token_count = 0;
 
@@ -302,22 +305,27 @@ $.TokenList = function (input, settings) {
 
     // Inner function to a token to the list
     function insert_token(id, value) {
-      var this_token = $("<li><p>"+ value +"</p> </li>")
-      .addClass(settings.classes.token)
-      .insertBefore(input_token);
+        var markup;
+        if ($.isFunction(settings.markupToken)) {
+            markup = settings.markupToken(id, value);
+        } else {
+            markup = '<p>' + value + '</p>';
+        }
+        var this_token = $("<li>"+ markup +"</li>")
+            .addClass(settings.classes.token)
+            .insertBefore(input_token);
 
-      // The 'delete token' button
-      $("<span>✘</span>")
-          .addClass(settings.classes.tokenDelete)
-          .appendTo(this_token)
-          .click(function () {
-              delete_token($(this).parent());
-              return false;
-          });
+        // The 'delete token' button
+        $("<span>✘</span>")
+            .addClass(settings.classes.tokenDelete)
+            .appendTo(this_token)
+            .click(function () {
+                delete_token($(this).parent());
+                return false;
+            });
 
-      $.data(this_token.get(0), "tokeninput", {"id": id, "name": value});
-
-      return this_token;
+        $.data(this_token.get(0), "tokeninput", {"id": id, "name": value});
+        return this_token;
     }
 
     // Add a token to the token list based on user input
@@ -336,9 +344,9 @@ $.TokenList = function (input, settings) {
         // Save this token id
         var id_string = li_data.id + ","
         hidden_input.val(hidden_input.val() + id_string);
-        
+
         token_count++;
-        
+
         if(settings.tokenLimit != null && settings.tokenLimit >= token_count) {
             input_box.hide();
             hide_dropdown();
@@ -412,9 +420,9 @@ $.TokenList = function (input, settings) {
         } else {
             hidden_input.val(str.slice(0, start) + str.slice(end, str.length));
         }
-        
+
         token_count--;
-        
+
         if (settings.tokenLimit != null) {
             input_box
                 .show()
@@ -549,7 +557,7 @@ $.TokenList = function (input, settings) {
               cache.add(query, settings.jsonContainer ? results[settings.jsonContainer] : results);
               populate_dropdown(query, settings.jsonContainer ? results[settings.jsonContainer] : results);
             };
-            
+
             if(settings.method == "POST") {
 			    $.post(settings.url + queryStringDelimiter + settings.queryParam + "=" + query, {}, callback, settings.contentType);
 		    } else {
