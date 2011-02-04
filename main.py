@@ -59,14 +59,18 @@ class TagsHandler(BaseHandler):
 
     def post(self, path=None):
         key = self.request.POST.get('key')
-        tags = self.request.POST.get('tags')
+        given_tags = self.request.POST.get('tags')
 
-        if None in (key, tags):
+        if None in (key, given_tags):
             self.error(500)
             return self.response.out.write('Missing key or tags')
 
-        tags = [tag.strip() for tag in tags.split(',') if tag.strip() in TAGS]
-        if not tags:
+        tags = [tag.strip() for tag in given_tags.split(',')
+                if tag.strip() in TAGS]
+        logging.info('Given tags: %r', given_tags)
+        logging.info('Valid tags: %r', tags)
+
+        if not tags and not given_tags:
             self.error(500)
             return self.response.out.write('No valid tags given')
 
@@ -75,7 +79,7 @@ class TagsHandler(BaseHandler):
             if obj is None:
                 self.error(500)
                 return self.response.out.write('Entity %r not found' % key)
-            obj.tags = list(set(obj.tags or []).union(set(tags)))
+            obj.tags = tags
             obj.put()
             return obj
         obj = db.run_in_transaction(txn)
