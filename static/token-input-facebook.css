@@ -1,6 +1,7 @@
 /* Example tokeninput style #2: Facebook style */
 ul.token-input-list-facebook {
     overflow: hidden; 
+    list-style-type: none;
     height: auto !important; 
     height: 1%;
     width: 400px;
@@ -13,10 +14,6 @@ ul.token-input-list-facebook {
     margin: 0;
     padding: 0;
     background-color: #fff;
-}
-
-ul.token-input-list-facebook {
-    list-style-type: none;
 }
 
 ul.token-input-list-facebook li input {
@@ -116,3 +113,72 @@ div.token-input-dropdown-facebook ul li.token-input-selected-dropdown-item-faceb
     color: #fff;
 }
 
+
+/* My modifications */
+ul.token-input-list-facebook {
+    display: inline-block;
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    vertical-align: bottom;
+    font-size: 11px;
+}
+
+ul.token-input-list-facebook li input {
+    border: 0;
+    width: 100px;
+    padding: 1px 3px;
+    font: 10px verdana;
+    background-color: white;
+    margin: 0 3px;
+}
+
+ul.token-input-list-facebook:hover li input,
+ul.token-input-list-facebook li input:focus {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+}
+
+li.token-input-list-facebook {
+    border: 1px solid #ccc;
+    background-color: #eee;
+    float: left;
+}
+li.token-input-token-facebook {
+    margin: 0 3px;
+    padding: 1px 3px;
+    background-color: #eee;
+    color: #333;
+    font: 10px verdana;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+}
+
+li.token-input-token-facebook span {
+    color: #666;
+    font-weight: normal;
+    margin-left: 3px;
+}
+li.token-input-token-facebook:hover span {
+    color: #900;
+}
+
+div.token-input-dropdown-facebook {
+    position: absolute;
+    width: 400px;
+    margin-top: 3px;
+    background-color: #fff;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    cursor: default;
+    font-size: 11px;
+    font-family: Verdana;
+    z-index: 1;
+    -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .1);
+}
