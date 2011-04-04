@@ -82,7 +82,12 @@ class SectorHandler(BrowseHandler):
 
 class StageHandler(BrowseHandler):
     def get_facet(self, facet, criteria):
-        return criteria
+        # Trick the template, which does {{ facet.kind }}: {{ facet }}
+        class Facet(object):
+            kind = facet.capitalize()
+            def __unicode__(self):
+                return criteria
+        return Facet()
     def get_ideas(self, facet, criteria):
         return Idea.all().filter('stage =', criteria).fetch(1000)
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>{{ facet.kind|default:facet }}: {{ facet }}</h2>
+    <h2><span>{{ facet.kind|default:facet }}:</span> {{ facet }}</h2>
     
     <h3>Found {{ ideas|length }} idea{{ ideas|pluralize }}</h3>
     <ul>
