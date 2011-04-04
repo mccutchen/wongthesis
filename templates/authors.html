@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Authors</h2>
+    <p>There are <b>{{ authors|length }} author{{ authors|pluralize }}</b> on the site.</p>
+    <table>
+        <tr>
+            <th>Username</th>
+            <th>Ideas</th>
+            <th>Posts</th>
+            <th>Total</th>
+        </tr>
+        {% for author in authors %}
+            <tr>
+                <td><a href="/author/{{ author.key.id }}">{{ author }}</a></td>
+                <td>{{ author.idea_count }}</td>
+                <td>{{ author.post_count }}</td>
+                <td>{{ author.contribution_count }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="10">No authors</td></tr>
+        {% endfor %}
+    </table>
+{% endblock %}

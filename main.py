@@ -164,12 +164,24 @@ class TagsHandler(BaseHandler):
         self.response.out.write(json.dumps(obj.tags))
 
 
+class AuthorsHandler(BaseHandler):
+    def get(self):
+        def sorter(author):
+            return (author.contribution_count,
+                    author.idea_count,
+                    author.post_count)
+        authors = Author.all().fetch(1000)
+        authors.sort(key=sorter, reverse=True)
+        return self.render('authors.html', {'authors': authors})
+
+
 urls = [
     (r'^/$', IndexHandler),
     (r'^/idea/(\d+)', IdeaHandler),
     (r'^/(sector)/(\d+)', SectorHandler),
     (r'^/(stage)/(\w+)', StageHandler),
     (r'^/(author)/(\d+)', AuthorHandler),
+    (r'^/authors$', AuthorsHandler),
     (r'^/(tag)/(.+)', TagHandler),
     (r'^/tags$', TagsHandler),
     ]

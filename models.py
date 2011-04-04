@@ -52,6 +52,16 @@ class Sector(BaseModel):
 
 class Author(BaseModel):
     username = db.StringProperty()
+    idea_count = db.IntegerProperty(default=0)
+    post_count = db.IntegerProperty(default=0)
+
+    @property
+    def ideas(self):
+        return Idea.all().filter('author =', self)
+
+    @property
+    def contribution_count(self):
+        return self.idea_count + self.post_count
 
     def make_source_url(self):
         return '/User/View?userid=%s' % self.key().id()

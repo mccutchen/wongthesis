@@ -50,20 +50,20 @@ div.responses {
     margin: 10px;
 }
 
-table.meta {
+table {
     border: 1px solid #ccc;
     margin: 2em 0;
 }
-table.meta th, table.meta td {
+table th, table td {
     text-align: left;
     vertical-align: top;
     padding: 5px 10px;
     border-top: 1px dotted #ccc;
 }
-table.meta tr:first-child > * {
+table tr:first-child > * {
     border-top: none;
 }
-table.meta th {
+table th {
     font-size: 90%;
 }
 
