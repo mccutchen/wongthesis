@@ -78,6 +78,15 @@ class BrowseHandler(BaseHandler):
             ctx = { 'facet': facet, 'ideas': ideas, 'posts': posts }
             return self.render('browse.html', ctx)
 
+    def fake_facet(self, kind, value):
+        # Trick the template, which does {{ facet.kind }}: {{ facet }}
+        class FakeFacet(object):
+            def __init__(self, kind, value):
+                self.kind = kind.capitalize()
+                self.value = value
+            def __unicode__(self):
+                return value
+        return FakeFacet(kind, value)
 
 class SectorHandler(BrowseHandler):
     def get_facet(self, facet, criteria):
@@ -87,12 +96,7 @@ class SectorHandler(BrowseHandler):
 
 class StageHandler(BrowseHandler):
     def get_facet(self, facet, criteria):
-        # Trick the template, which does {{ facet.kind }}: {{ facet }}
-        class Facet(object):
-            kind = facet.capitalize()
-            def __unicode__(self):
-                return criteria
-        return Facet()
+        return self.fake_facet(facet, criteria)
     def get_ideas(self, facet, criteria):
         return Idea.all().filter('stage =', criteria).fetch(1000)
 
@@ -106,7 +110,7 @@ class AuthorHandler(BrowseHandler):
 
 class TagHandler(BrowseHandler):
     def get_facet(self, facet, criteria):
-        return 'Tag'
+        return self.fake_facet(facet, criteria)
     def get_ideas(self, facet, criteria):
         return Idea.all().filter('tags =', urllib.unquote(criteria))\
             .fetch(1000)
