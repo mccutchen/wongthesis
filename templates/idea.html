@@ -1,13 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2>Idea: {{ idea.title }}</h2>
-    <h3>By <a href="/author/{{ idea.author.key.id }}">{{ idea.author }}</a></h3>
-    <h4>In <a href="/sector/{{ idea.sector.key.id }}">{{ idea.sector }}</a></h4>
+    <h2><span>Idea:</span> {{ idea.title }}</h2>
 
     <div class="idea body">
         {{ idea.body|safe }}
     </div>
+
+    <table class="meta">
+        <tr>
+            <th>Author</th>
+            <td><a href="/author/{{ idea.author.key.id }}">{{ idea.author }}</a></td>
+        </tr>
+        <tr>
+            <th>Sector</th>
+            <td><a href="/sector/{{ idea.sector.key.id }}">{{ idea.sector }}</a></td>
+        </tr>
+        <tr>
+            <th>Stage</th>
+            <td><a href="/stage/{{ idea.stage }}">{{ idea.stage }}</a></td>
+        </tr>
+        <tr>
+            <th>Views</th>
+            <td>{{ idea.views }}</td>
+        </tr>
+        <tr>
+            <th>Posted</th>
+            <td>{{ idea.created_at|date:"M d Y" }}</td>
+        </tr>
+    </table>
 
     {% with idea as obj %}
         {% include "_tags.html" %}

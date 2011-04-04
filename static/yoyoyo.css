@@ -22,9 +22,17 @@ h1 {
 	border-bottom: 2px solid #600;
 	padding: 10px 20px;
 }
+h2 > span {
+    color: #666;
+    font-size: 90%;
+}
 
 div.content {
 	margin: 20px;
+}
+
+div.responses {
+    margin-top: 2em;
 }
 
 .post {
@@ -34,4 +42,21 @@ div.content {
 }
 .post .post {
     margin: 10px;
+}
+
+table.meta {
+    border: 1px solid #ccc;
+    margin: 2em 0;
+}
+table.meta th, table.meta td {
+    text-align: left;
+    vertical-align: top;
+    padding: 5px 10px;
+    border-top: 1px dotted #ccc;
+}
+table.meta tr:first-child > * {
+    border-top: none;
+}
+table.meta th {
+    font-size: 90%;
 }
