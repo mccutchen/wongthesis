@@ -60,3 +60,6 @@ table.meta tr:first-child > * {
 table.meta th {
     font-size: 90%;
 }
+
+.pos { color: #090; }
+.neg { color: #900; }
