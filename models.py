@@ -70,6 +70,23 @@ class Post(BaseModel):
     tags = db.StringListProperty()
     created_at = db.DateTimeProperty()
 
+    @property
+    def papa_key(self):
+        return self.__class__.papa.get_value_for_datastore(self)
+
+    def get_idea(self):
+        if self.papa_key is None:
+            return self
+        else:
+            idea = self.papa
+            while idea.papa_key is not None:
+                idea = idea.papa
+            return idea
+
+    def make_local_url(self):
+        idea = self.get_idea()
+        return '/idea/%s#post:%s' % (idea.key().id(), self.key().id())
+
     def __unicode__(self):
         return u'Post:%s' % self.key().id()
 
