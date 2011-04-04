@@ -80,6 +80,12 @@ class SectorHandler(BrowseHandler):
     def get_ideas(self, facet, criteria):
         return facet.ideas.fetch(1000)
 
+class StageHandler(BrowseHandler):
+    def get_facet(self, facet, criteria):
+        return criteria
+    def get_ideas(self, facet, criteria):
+        return Idea.all().filter('stage =', criteria).fetch(1000)
+
 class AuthorHandler(BrowseHandler):
     def get_facet(self, facet, criteria):
         return Author.get_by_id(int(criteria))
@@ -148,6 +154,7 @@ urls = [
     (r'^/$', IndexHandler),
     (r'^/idea/(\d+)', IdeaHandler),
     (r'^/(sector)/(\d+)', SectorHandler),
+    (r'^/(stage)/(\w+)', StageHandler),
     (r'^/(author)/(\d+)', AuthorHandler),
     (r'^/(tag)/(.+)', TagHandler),
     (r'^/tags$', TagsHandler),
