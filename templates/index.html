@@ -3,8 +3,17 @@
 {% block content %}
     <h2>Ideas</h2>
     <ul>
-        {% for idea in ideas %}
-            {% include "_idea_summary.html" %}
+        {% for stage, ideas in grouped_ideas %}
+            <li>
+                <h3><a href="/stage/{{ stage }}">{{ stage }}</a> <span>({{ ideas|length }} idea{{ ideas|pluralize }})</h3>
+                <ul>
+                    {% for idea in ideas %}
+                        {% include "_idea_summary.html" %}
+                    {% empty %}
+                        <li>No ideas.</li>
+                    {% endfor %}
+                </ul>
+            </li>
         {% empty %}
             <li>No ideas.</li>
         {% endfor %}

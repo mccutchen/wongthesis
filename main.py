@@ -1,6 +1,8 @@
 import os
 import logging
 import urllib
+from itertools import groupby
+from operator import attrgetter
 
 from google.appengine.ext import db
 from google.appengine.ext import webapp
@@ -32,8 +34,11 @@ class BaseHandler(webapp.RequestHandler):
 class IndexHandler(BaseHandler):
 
     def get(self):
-        ideas = Idea.all().fetch(1000)
-        self.render('index.html', {'ideas': ideas})
+        ideas = Idea.all().order('stage').fetch(1000)
+        grouped_ideas = groupby(ideas, attrgetter('stage'))
+        # Force evaluation of the generators, so they can be reused
+        grouped_ideas = [(key, list(group)) for key, group in grouped_ideas]
+        self.render('index.html', {'grouped_ideas': grouped_ideas})
 
 
 class IdeaHandler(BaseHandler):
