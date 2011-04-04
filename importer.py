@@ -44,7 +44,7 @@ def import_all():
     import_ideas()
     import_posts()
 
-@withsoup('http://manorlabs.spigit.com/homepage?num_ideas=1000')
+@withsoup('http://manorlabs.spigit.com/homepage?num_ideas=1000&idea_stage=5')
 def import_ideas(soup, commit=True):
     print 'Importing ideas...'
 
